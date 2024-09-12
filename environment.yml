@@ -1,0 +1,13 @@
+name: vdbyt
+channels:
+  - conda-forge
+dependencies:
+  - python >= 3.10
+  - numpy
+  - yt >= 4.0.0
+  - h5py
+  - openvdb
+  - click
+  - pip
+  - pooch
+  - pandas

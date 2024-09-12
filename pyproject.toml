@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools >= 65.5"]
+build-backend = "setuptools.build_meta"
+
+[project]
+dynamic = ["version"]
+name = "vbdyt"
+requires-python = ">= 3.10"
+dependencies = [
+    "yt>4.0.0",
+    "numpy",
+    "click"
+]
+
+[tool.setuptools.packages.find]
+include = ["vdbyt"]
+
+[tool.setuptools.dynamic]
+version = {attr = "vdbyt.__version__"}
+
+[project.scripts]
+vdbyt = "vdbyt.vdbyt_cli:cli"
