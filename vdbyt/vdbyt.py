@@ -5,15 +5,15 @@ from ._vdb_version import vdb_version
 import numpy as np
 from packaging.version import Version
 from yt.data_objects.construction_data_containers import YTCoveringGrid
+import numpy.typing as npt 
 
-
-def _normalize_variable_data(data,
+def _normalize_variable_data(data: npt.NDArray,
                              log_the_variable: bool = False,
                              variable_tol: float | None = None,
                              renorm: bool = True,
                              renorm_min: float | None = None,
                              renorm_max: float | None = None,
-                             ):
+                             )->npt.NDArray:
     if renorm:
         if renorm_min is None:
             renorm_min = data.min()
@@ -52,7 +52,7 @@ def _get_cg_point_data(covering_grid: YTCoveringGrid,
                        renorm: bool = True,
                        renorm_min: float | None = None,
                        renorm_max: float | None = None,
-                       ):
+                       )->npt.NDArray:
     # extract and process data from a covering grid
 
     data = covering_grid[variable_out].v
@@ -135,6 +135,7 @@ def write_yt_amr_as_vdb(ds: yt.data_objects.static_output.Dataset,
                         renorm: bool = True,
                         renorm_max: float | None = None,
                         renorm_min: float | None = None,
+                        no_ghosts: bool = True,
                         ):
 
     # Keep track of level 0 voxel size
@@ -154,11 +155,13 @@ def write_yt_amr_as_vdb(ds: yt.data_objects.static_output.Dataset,
 
             subGrid = gs[index]
 
-            # Extract grid (without ghost zone) with specific varible
-            # subGridVar = subGrid[variable_out]
+            if no_ghosts:
+                # Extract grid (without ghost zone) with specific varible
+                grid_data = subGrid[variable_out]
+            else:
+                # Extract grid (with ghost zone) with specific variable
+                grid_data = subGrid.retrieve_ghost_zones(n_zones=1, fields=variable_out)[variable_out]
 
-            # Extract grid (with ghost zone) with specific variable
-            grid_data = subGrid.retrieve_ghost_zones(n_zones=1, fields=variable_out)[variable_out]
             grid_data = _normalize_variable_data(grid_data.v,
                                                  log_the_variable=log_the_variable,
                                                  variable_tol=variable_tol,
@@ -194,7 +197,8 @@ def write_yt_amr_as_vdb(ds: yt.data_objects.static_output.Dataset,
         maskCube.transform = vdb.createLinearTransform(maskMatrix)
 
         # Write out the generated VDB
-        dataCube.name = f"density_{level}"
+        varname = "_".join(variable_out)
+        dataCube.name = f"{varname}_{level}"
         maskCube.name = f"mask_{level}"
         output.append(maskCube)
         output.append(dataCube)
