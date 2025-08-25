@@ -1,5 +1,5 @@
 try:
-    import pyopenvdb
+    import openvdb as pyopenvdb
 except ImportError:
     msg = "vdbyt requires an installation of openvdb and the accompanying python " \
           "module, pyopenvdb. If using conda, you may be able to install openvdb " \
